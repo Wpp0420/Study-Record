@@ -304,7 +304,7 @@ git rm -r --cached <directory_name>
 
 将`<directory_name>`替换为你想要删除的目录名。
 
-例如，如果你想删除名为`logs`的**目录下的所有文件**，你可以执行：
+例如，如果你想删除名为`logs`的**目录下的所有文 8件**，你可以执行：
 
 ```
 git rm -r --cached logs
