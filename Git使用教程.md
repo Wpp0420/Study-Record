@@ -277,3 +277,156 @@ git branch -M main
 ```
 
 命令, 把当前master分支改名为main, 其中-M的意思是移动或者重命名当前分支
+
+## 16.删除文件
+
+将文件从仓库中移除且在工作路径中保留：
+
+```
+git rm --cached <file_name>
+```
+
+将文件从仓库中移除，且下次不再tracked：
+
+```
+git rm <file_name>
+```
+
+要从Git仓库中删除一个目录下的所有文件，你可以使用`git rm`命令配合`-r`选项来递归地删除目录内的所有文件。以下是具体的命令和步骤：
+
+1. 打开终端（Terminal）或命令提示符（Command Prompt）。
+2. 切换到包含你的Git仓库的目录。
+3. 执行以下命令来删除指定目录下的所有文件：
+
+```
+git rm -r --cached <directory_name>
+```
+
+将`<directory_name>`替换为你想要删除的目录名。
+
+例如，如果你想删除名为`logs`的**目录下的所有文件**，你可以执行：
+
+```
+git rm -r --cached logs
+```
+
+这将会删除`logs`目录及其子目录中的所有文件，并将这些删除操作记录到Git历史中。
+
+如果你还想从工作目录中删除这些文件（不仅仅是Git仓库），可以省略`--cached`选项：
+
+```
+git rm -r logs
+```
+
+最后，提交这次改动：
+
+```
+git commit -m "Remove <directory_name> from repository"
+```
+
+将`<directory_name>`替换为你删除的目录名。
+
+完成这些步骤后，你就可以将这些更改推送到远程仓库：
+
+```
+git push
+```
+
+# Git报错记录
+
+## 1.本地与github不同步导致push出错
+
+Git在push推送时，报错提示信息如下：
+
+```
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+```
+
+原因分析：
+
+原因分析：
+
+是由于本地和远程仓库两者代码文件不同步，因此需要先pull，进行合并然后再进行push
+
+解决方法：
+1、先使用pull命令：
+
+```python
+git pull --rebase origin main
+```
+
+2、再使用pu[sh命令](https://so.csdn.net/so/search?q=sh命令&spm=1001.2101.3001.7020)：
+
+```python
+git push -u origin main
+```
+
+**rebase区别：**
+
+```bash
+git pull = git fetch + git merge
+git pull --rebase = git fetch + git rebase
+12
+```
+
+git fetch : 从远程分支拉取代码,可以得到远程分支上最新的代码。
+
+所以git pull origin master与git pull --[rebase](https://so.csdn.net/so/search?q=rebase&spm=1001.2101.3001.7020) origin master的区别主要是在远程与本地代码的合并上面了。
+
+现在有两个分支：test和master，假设远端的master的代码已经更改了（在B基础上变动：C,F），test的代码更改了要提交代码（在B基础上变动：D,E），如下图：
+
+```bash
+      D---E test
+      /
+ A---B---C---F--- master
+123
+```
+
+问题就来了，如果C,F和D,E的更改发生冲突，那么就需要我们合并冲突了，下面我们来看看git merge和git rebase怎么合并的
+
+git merge
+
+```bash
+       D--------E
+      /          \
+ A---B---C---F----G---   test, master
+123
+```
+
+git rebase
+
+```bash
+A---B---D---E---C‘---F‘---   test, master
+1
+```
+
+对比可看出：git merge多出了一个新的节点G，会将远端master的代码和test本地的代码在这个G节点合并，之前的提交会分开去显示。
+
+git --rebase会将两个分支融合成一个线性的提交，不会形成新的节点。
+
+rebase好处
+想要更好的提交树，使用rebase操作会更好一点。
+这样可以线性的看到每一次提交，并且没有增加提交节点。
+merge 操作遇到冲突的时候，当前merge不能继续进行下去。手动修改冲突内容后，add 修改，commit 就可以了。
+而rebase 操作的话，会中断rebase,同时会提示去解决冲突。
+解决冲突后,将修改add后执行git rebase –continue继续操作，或者git rebase –skip忽略冲突。
+
+为什么选择 git pull --rebase
+1. 保持提交历史的整洁
+问题： 使用 Merge 合并后，提交历史中会存在分叉，看起来比较杂乱。
+解决： 使用 Rebase 合并可以生成线性的提交历史，更加整洁可读。
+2. 避免不必要的合并提交
+问题： Merge 合并可能会在每次拉取远程更改时生成一个新的合并提交。
+解决： Rebase 合并可以避免创建不必要的合并提交，使提交历史更加干净。
+3. 减少冲突解决的复杂性
+问题： Merge 合并时，如果有多个人在同一文件的相同位置做了修改，可能会导致冲突，需要手动解决。
+解决： Rebase 合并可以在应用本地提交时逐个处理，减少了冲突的复杂性。
+4. 提交历史的可追溯性
+问题： Merge 合并时，分叉的历史可能导致不同分支的提交顺序混乱。
+解决： Rebase 合并生成线性提交历史，更容易理解和追溯。
+注意事项
+慎用于共享分支： 在对已经推送到远程仓库的分支进行 Rebase 操作时，可能导致冲突，应慎重使用。
+团队协作： 在团队协作中，协商好使用哪种合并策略，以免造成混乱。
+
